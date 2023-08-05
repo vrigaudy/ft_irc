@@ -2,7 +2,7 @@
 #include "../../includes/Channel.hpp"
 
 Channel::Channel(std::string name) : _name(name), _limited(false, size_t()),
-_key(false, std::string()), _topic(false, std::string()) {
+_key(false, std::string()), _topic(false, std::string()), _public(true), _mode_t(false) {
 }
 
 Channel::~Channel(){
@@ -31,6 +31,14 @@ void	Channel::removeByNick(std::string nick) {
 		_users.erase(nick);
 }
 
+bool	Channel::isPublic() const {
+	return	_public;
+}
+
+bool	Channel::isModet() const {
+	return	_mode_t;
+}
+
 std::string	Channel::getUsersList() {
 	std::string list;
 	std::map<std::string, User *>::iterator it = _users.begin();
@@ -47,7 +55,11 @@ std::string	Channel::getUsersList() {
 
 std::string Channel::getModes() {
 	std::string ret;
-
+	
+	if (!_public)
+		ret += "i";
+	if (_mode_t)
+		ret += "t";
 	if (_key.first)
 		ret += "k";
 	if (_limited.first)
@@ -117,4 +129,18 @@ void Channel::setKey(bool value, std::string key) {
 void Channel::setTopic(bool value, std::string topic) {
 	_topic.first = value;
 	_topic.second = topic;
+}
+
+void Channel::setPublic() {
+	if (_public == true)
+		_public = false;
+	else
+		_public = true;
+}
+
+void	Channel::setModet() {
+	if (_mode_t == false)
+		_mode_t = true;
+	else
+		_mode_t = false;
 }

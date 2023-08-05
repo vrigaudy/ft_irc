@@ -2,7 +2,7 @@
 #include "../../includes/User.hpp"
 
 User::User(int sd) : _user_sd(sd), _auth(0), _tried_to_auth(0), _first_try(1),
-_cap(0), _invisible(0), _op(0), _nick(), _user_name(), _real_name(), _host_name() {
+_cap(0), _invisible(0), _op(0), _nick(), _user_name(), _real_name(), _host_name(), _invite_list() {
 }
 
 User::~User() {
@@ -66,6 +66,12 @@ bool const &User::getCap() const {
 	return _cap;
 }
 
+bool	User::getInvite(std::string chan) const {
+	if (std::find(_invite_list.begin(), _invite_list.end(), chan) != _invite_list.end())
+		return true;
+	return false;
+}
+
 bool const &User::isOp() const {
 	return _op;
 }
@@ -116,6 +122,11 @@ void User::setOp(bool value) {
 
 void User::setInvisible(bool value) {
 	_invisible = value;
+}
+
+void User::setInvite(std::string chan) {
+	if (std::find(_invite_list.begin(), _invite_list.end(), chan) == _invite_list.end())
+		_invite_list.push_back(chan);
 }
 
 void User::addChannel(Channel *channel) {

@@ -22,6 +22,7 @@ class User {
 		std::map<std::string, Channel *> _ops;
 		std::map<std::string, Channel *> _joined;
 		User();
+		std::vector<std::string>	_invite_list;
 
 	public:
 		User(int sd);
@@ -40,6 +41,7 @@ class User {
 		bool const			&getCap() const;
 		bool const			&isOp() const;
 		bool const			&isInvisible() const;
+		bool				getInvite(std::string chan) const;
 		bool				isOp(Channel *channel);
 		void				setNick(std::string value);
 		void				setUserName(std::string value);
@@ -51,6 +53,7 @@ class User {
 		void				setCap(bool value);
 		void				setOp(bool value);
 		void				setInvisible(bool value);
+		void				setInvite(std::string chan);
 		void				addChannel(Channel *channel);
 		void				addOps(Channel *channel);
 		void				removeFromChannel(Channel *channel);

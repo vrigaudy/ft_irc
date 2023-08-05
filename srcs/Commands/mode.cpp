@@ -64,6 +64,12 @@ int Server::_applyMode(User *user, Channel *channel, std::string buff, bool valu
 				continue ;
 			channel->setLimited(value, atoi(it->second.c_str()));
 		}
+		else if (it->first == 'i') {
+			channel->setPublic();
+		}
+		else if (it->first == 't') {
+			channel->setModet();
+		}
 		else if (it->first == 'k') {
 			if (value && it->second.empty()) {
 				_sendError(user, ERR_NEEDMOREPARAMS(user->getClient(), user->getNick(), "MODE"));

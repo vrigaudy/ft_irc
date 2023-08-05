@@ -15,6 +15,8 @@ class Channel {
 		std::pair<bool, std::string>	_topic;
 		std::map<std::string, User *>	_users;
 		std::map<std::string, User *>	_opers;
+		bool							_public;
+		bool							_mode_t;
 
 	public:
 		Channel(std::string name);
@@ -24,6 +26,8 @@ class Channel {
 		void removeUser(User *user);
 		void removeByNick(std::string nick);
 		bool isOp(User *user);
+		bool isPublic() const;
+		bool isModet() const;
 		std::string getUsersList();
 		std::string getModes();
 		std::map<std::string, User *> getUsers() const;
@@ -37,5 +41,6 @@ class Channel {
 		void setLimited(bool value, size_t n);
 		void setKey(bool value, std::string key);
 		void setTopic(bool value, std::string topic);
-
+		void setPublic();
+		void setModet();
 };

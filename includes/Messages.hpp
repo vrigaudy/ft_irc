@@ -68,6 +68,7 @@
 #define ERR_KEYSET(client, nickname, channel) ":" + std::string(client) + " 467 " + std::string(nickname) + " " + std::string(channel) + RED " :Channel key already set" RESET "\r\n"
 #define ERR_CHANNELISFULL(client, nickname, chan_name) (":" + std::string(client) + " 471 " + std::string(nickname) + " " + std::string(chan_name) + " :Cannot join channel (+l)" RESET "\r\n")
 #define ERR_UNKNOWNMODE(client, nickname, mode, channel) ":" + std::string(client) + " 472 " + std::string(nickname) + " " + std::string(mode) + RED " :is unknown mode char to me for " + std::string(channel) + RESET "\r\n"
+#define ERR_INVITEONLYCHAN(client, nickname, chan_name) (":" + std::string(client) + " 473 " + std::string(nickname) + " " + std::string(chan_name) + " :channel is invite only" RESET "\r\n")
 #define ERR_NOPRIVILEGES(client, nickname) (":" + std::string(client) + " 481 " + std::string(nickname) + RED + " :Permission Denied - You're not an IRC operator" RESET "\r\n")
 #define ERR_CHANOPRIVSNEEDED(client, nickname, chan_name) (":" + std::string(client) + " 482 " + std::string(nickname) + RED + " " + std::string(chan_name) + " :You're not a channel operator" RESET "\r\n")
 #define ERR_BADCHANNELKEY(client, nickname, chan_name) (":" + std::string(client) + " 475 " + std::string(nickname) + " " + std::string(chan_name) + " :Cannot join channel (+k)" RESET "\r\n")

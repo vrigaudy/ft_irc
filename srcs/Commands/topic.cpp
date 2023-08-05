@@ -14,7 +14,7 @@ int Server::_topic(User *user, std::string args) {
 	if (!chan->getUsers().count(user->getNick()))
 		return _sendError(user, ERR_NOTONCHANNEL(user->getClient(), user->getNick(), pair.first)));
 	if (args.find(':') != args.npos) {
-		if (!user->isOp(chan))
+		if (!user->isOp(chan) && chan->isModet() == true)
 			return _sendError(user, ERR_CHANOPRIVSNEEDED(user->getClient(), user->getNick(), pair.first));
 		chan->setTopic(true, pair.second);
 		std::map<std::string, User *> targets = chan->getUsers();

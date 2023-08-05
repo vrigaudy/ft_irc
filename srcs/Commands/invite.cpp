@@ -33,5 +33,7 @@ int	Server::_invite(User *user, std::string buff) {
 	std::string rpl = ":" + user->getNick() + " INVITE " + new_user->getNick() + " " + chan + "\r\n";
 	_sendExecuted(new_user, rpl);
 	_sendExecuted(user, RPL_INVITE(user->getClient(), new_user->getNick(), chan));
+	if (_channels.find(chan)->second->isOp(user) == true)
+		new_user->setInvite(chan);
 	return 0;
 }

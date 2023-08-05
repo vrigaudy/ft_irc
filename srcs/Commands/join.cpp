@@ -43,6 +43,8 @@ int Server::_checkModes(User *user, Channel *new_chan, std::string key) {
 		return _sendError(user, ERR_BADCHANNELKEY(user->getClient(), user->getNick(), new_chan->getName()));
 	if (new_chan->getLimited().first && new_chan->getLimited().second == new_chan->getUsers().size())
 		return _sendError(user, ERR_CHANNELISFULL(user->getClient(), user->getNick(), new_chan->getName()));
+	if (new_chan->isPublic() == false && user->getInvite(new_chan->getName()) == false && new_chan->isOp(user) == false)
+		return _sendError(user, ERR_INVITEONLYCHAN(user->getClient(), user->getNick(), new_chan->getName()));
 	return 0;
 }
 
