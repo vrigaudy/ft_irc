@@ -8,10 +8,10 @@
 extern bool stop;
 
 Server::Server(char *port, char *password) : _creation_time(currentTime()),
- _password(password), _port(port), _pfds(), _fd_count(0), _op_name("ircadmin"),
- _op_password("ircpassword") {
-	_initCmd();
-}
+	_password(password), _port(port), _pfds(), _fd_count(0), _op_name("ircadmin"),
+	_op_password("ircpassword") {
+		_initCmd();
+	}
 
 void Server::clear() {
 	_recvs.clear();
@@ -102,6 +102,7 @@ void Server::_acceptUser() {
 	_pfds.push_back(pollfd());
 	_pfds.back().fd = new_sd;
 	_pfds.back().events = POLLIN;
+	_client_buffers.insert(std::make_pair(new_sd, ""));
 	_fd_count++;
 }
 
@@ -129,6 +130,7 @@ int Server::_disconnectUser(User *user, int ret) {
 	std::vector<pollfd>::iterator it;
 	for (it = _pfds.begin() + 1; it->fd != user->getUserSd(); it++)
 		;
+	_client_buffers.erase(user->getUserSd());
 	user->removeFromAll();
 	_delEmptyChans();
 	_pfds.erase(it);
@@ -150,8 +152,9 @@ int Server::_manageRequest(pollfd pfd) {
 	if ((ret = _recvAll(pfd)))
 		return ret;
 	_recvs.clear();
-	lines = _fillRecvs(std::string(_buff));
-	_buff.clear();
+	lines = _fillRecvs(_client_buffers[pfd.fd]);
+	if (lines >= 1)
+		_client_buffers[pfd.fd].clear();
 	for (int i = 0; i < lines; i++) {
 		std::cout << DIS_RECV << pfd.fd << DIS_RECVEND(_recvs[i].first, _recvs[i].second) << std::endl;
 		if ((status = _manageCmd(pfd, _recvs[i]))) {
@@ -169,32 +172,35 @@ int Server::_manageRequest(pollfd pfd) {
 }
 
 int Server::_fillRecvs(std::string buff) {
-	size_t space_pos;
-	size_t backr_pos;
-	std::string::iterator begin;
-	std::string::iterator space;
-	std::string::iterator backr;
-	int lines = std::count(buff.begin(), buff.end(), '\n');
+	if (buff.find("\r\n")) {
+		size_t space_pos;
+		size_t backr_pos;
+		std::string::iterator begin;
+		std::string::iterator space;
+		std::string::iterator backr;
+		int lines = std::count(buff.begin(), buff.end(), '\n');
 
-	for (int i = 0; i < lines; i++) {
-		begin = buff.begin();
-		space_pos = buff.find(' ');
-		backr_pos = buff.find('\r');
-		space = begin + space_pos;
-		backr = begin + backr_pos;
-		if (backr_pos == buff.npos && space_pos == buff.npos)
-			_recvs.push_back(std::make_pair(std::string(begin, buff.end() - 1), std::string()));
-		else if (space_pos == buff.npos)
-			_recvs.push_back(std::make_pair(std::string(begin, buff.end() - 2), std::string()));
-		else {
-			if (backr_pos == buff.npos)
-				_recvs.push_back(std::make_pair(std::string(begin, space), std::string(space + 1, buff.end() - 1)));
-			else
-				_recvs.push_back(std::make_pair(std::string(begin, space), std::string(space + 1, backr)));
+		for (int i = 0; i < lines; i++) {
+			begin = buff.begin();
+			space_pos = buff.find(' ');
+			backr_pos = buff.find('\r');
+			space = begin + space_pos;
+			backr = begin + backr_pos;
+			if (backr_pos == buff.npos && space_pos == buff.npos)
+				_recvs.push_back(std::make_pair(std::string(begin, buff.end() - 1), std::string()));
+			else if (space_pos == buff.npos)
+				_recvs.push_back(std::make_pair(std::string(begin, buff.end() - 2), std::string()));
+			else {
+				if (backr_pos == buff.npos)
+					_recvs.push_back(std::make_pair(std::string(begin, space), std::string(space + 1, buff.end() - 1)));
+				else
+					_recvs.push_back(std::make_pair(std::string(begin, space), std::string(space + 1, backr)));
+			}
+			buff.erase(begin, backr + 2);
 		}
-		buff.erase(begin, backr + 2);
+		return lines;
 	}
-	return lines;
+	return 0;
 }
 
 int Server::_sendAll(int fd, const char *buf, size_t len, int flags) {
@@ -212,7 +218,7 @@ int Server::_sendAll(int fd, const char *buf, size_t len, int flags) {
 	return 0;
 }
 
-size_t Server::_recvAll(pollfd pfd) {
+int Server::_recvAll(pollfd pfd) {
 	char buffer[BUFFER_SIZE + 1];
 	int size;
 
@@ -223,9 +229,14 @@ size_t Server::_recvAll(pollfd pfd) {
 		if (size == 0)
 			return _disconnectUser(_users[pfd.fd], 0);
 		buffer[size] = 0;
-		_buff += buffer;
-		if (_buff.find('\n') != _buff.npos)
+		_client_buffers[pfd.fd] += buffer;
+		size_t crlfPos = _client_buffers[pfd.fd].find("\r\n");
+		if (crlfPos != std::string::npos)
 			break;
+		else if (_client_buffers[pfd.fd].find("\n") != std::string::npos) {
+			_client_buffers[pfd.fd].erase(_client_buffers[pfd.fd].find("\n"));
+			break;
+		}
 	}
 	return 0;
 }

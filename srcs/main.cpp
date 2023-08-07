@@ -7,6 +7,7 @@
 #define PORT_ERR  "Invalid port, use only number between 1024 and 65535"
 #define PASSWORD_ERR "Password must not be empty"
 
+//test
 bool stop = 0;
 
 void sig_handler(int sig) {

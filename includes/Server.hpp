@@ -40,11 +40,11 @@ class Server {
 		int						_fd_count;
 		std::string				_op_name;
 		std::string				_op_password;
-		std::string				_buff;
 		std::string				_new_connection;
 		std::vector<std::pair<std::string, std::string> >	_recvs;
 		std::map<std::string, Channel *>					_channels;
 		std::map<const std::string, cmds>					_cmds;
+		std::map<int, std::string>							_client_buffers;
 
 	public:
 		Server(char *port, char *password);
@@ -57,10 +57,11 @@ class Server {
 		void	_initCmd();
 		void	_acceptUser();
 		int		_manageRequest(pollfd pfds);
-		int		_fillRecvs(std::string buff);
+		//int		_fillRecvs(int fd);
+		int		_fillRecvs(std::string);
 		int		_manageCmd(pollfd pfd, std::pair<std::string, std::string> cmd);
 		int		_sendAll(int fd, const char *buf, size_t len, int flags);
-		size_t	_recvAll(pollfd pfd);
+		int		_recvAll(pollfd pfd);
 		std::pair<std::string, std::string>	_strToPair(std::string buff);
 		std::pair<std::string, std::string>	_splitPrivMsg(std::string buff);
 		std::string _getReason(std::string &buff);
